@@ -1,4 +1,3 @@
-
 import { useState } from "react"
 import { 
   LayoutDashboard, 
@@ -13,7 +12,8 @@ import {
   ShoppingCart,
   Receipt,
   FileCheck,
-  Truck
+  Truck,
+  ClipboardList
 } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
 import {
@@ -33,6 +33,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 
 const mainNavItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
+  { title: "Order Management", url: "/orders", icon: ClipboardList, badge: "New" },
   { title: "Inventory", url: "/inventory", icon: Package, badge: "12" },
   { title: "Reports", url: "/reports", icon: BarChart3 },
   { title: "Users", url: "/users", icon: Users },
@@ -69,13 +70,17 @@ export function AppSidebar() {
     <Sidebar className="border-r border-gray-200 bg-white shadow-lg">
       <SidebarHeader className="p-6 border-b border-gray-100">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-chhapai-gold to-chhapai-gold-dark rounded-lg flex items-center justify-center">
-            <span className="text-chhapai-black font-bold text-lg">C</span>
+          <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center overflow-hidden">
+            <img 
+              src="/lovable-uploads/2ad983cc-4751-4919-a2a0-0eeca00fb610.png" 
+              alt="Chhapai Logo" 
+              className="w-8 h-8 object-contain"
+            />
           </div>
           {!collapsed && (
             <div>
               <h2 className="text-xl font-bold text-chhapai-black">Chhapai</h2>
-              <p className="text-sm text-gray-600">Procurement & Inventory</p>
+              <p className="text-sm text-gray-600">Ideas. Realised.</p>
             </div>
           )}
         </div>
