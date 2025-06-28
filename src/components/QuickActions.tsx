@@ -1,6 +1,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { useNavigate } from "react-router-dom"
 import { 
   Plus, 
   FileText, 
@@ -32,7 +33,7 @@ const quickActions = [
     description: "Add new inventory item",
     icon: Package,
     color: "bg-purple-500 hover:bg-purple-600",
-    href: "/inventory/add"
+    href: "/inventory"
   },
   {
     title: "Material Received",
@@ -58,6 +59,12 @@ const quickActions = [
 ]
 
 export function QuickActions() {
+  const navigate = useNavigate()
+
+  const handleActionClick = (href: string) => {
+    navigate(href)
+  }
+
   return (
     <Card className="border-gray-200">
       <CardHeader className="pb-4">
@@ -73,7 +80,7 @@ export function QuickActions() {
               key={index}
               variant="outline"
               className="h-auto p-4 flex items-start gap-3 hover:shadow-md transition-all duration-200 border-gray-200 hover:border-chhapai-gold"
-              onClick={() => console.log(`Navigate to ${action.href}`)}
+              onClick={() => handleActionClick(action.href)}
             >
               <div className={`p-2 rounded-lg text-white ${action.color}`}>
                 <action.icon className="h-4 w-4" />
