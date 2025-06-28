@@ -1,26 +1,29 @@
 
 import { DashboardLayout } from "@/components/DashboardLayout"
 import { DashboardStats } from "@/components/DashboardStats"
-import { RecentActivity } from "@/components/RecentActivity"
 import { QuickActions } from "@/components/QuickActions"
+import { RecentActivity } from "@/components/RecentActivity"
+import { NotificationCenter } from "@/components/NotificationCenter"
 
 const Index = () => {
   return (
     <DashboardLayout 
       title="Dashboard" 
-      subtitle="Welcome back! Here's what's happening with your procurement and inventory."
+      subtitle="Welcome to Chhapai Procurement & Inventory Management System"
     >
-      <div className="animate-fade-in">
+      <div className="animate-fade-in space-y-6">
         <DashboardStats />
         
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           <div className="lg:col-span-2">
-            <RecentActivity />
-          </div>
-          <div>
             <QuickActions />
           </div>
+          <div>
+            <NotificationCenter />
+          </div>
         </div>
+        
+        <RecentActivity />
       </div>
     </DashboardLayout>
   );

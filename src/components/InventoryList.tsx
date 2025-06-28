@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Plus, Search, AlertTriangle, Package } from "lucide-react"
+import { AddInventoryForm } from "@/components/AddInventoryForm"
 
 const sampleInventory = [
   { id: 1, name: "Office Paper A4", sku: "SKU001", category: "Stationery", quantity: 25, minStock: 50, price: 250, location: "Store A" },
@@ -15,17 +16,33 @@ const sampleInventory = [
 
 export function InventoryList() {
   const [searchTerm, setSearchTerm] = useState("")
-  const [inventory] = useState(sampleInventory)
+  const [inventory, setInventory] = useState(sampleInventory)
+  const [showAddForm, setShowAddForm] = useState(false)
 
   const filteredInventory = inventory.filter(item =>
     item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.sku.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
+  const handleAddItem = (newItem: any) => {
+    setInventory(prev => [...prev, newItem])
+  }
+
   const getStockStatus = (quantity: number, minStock: number) => {
     if (quantity === 0) return { label: "Out of Stock", variant: "destructive" as const }
     if (quantity <= minStock) return { label: "Low Stock", variant: "secondary" as const }
     return { label: "In Stock", variant: "default" as const }
+  }
+
+  if (showAddForm) {
+    return (
+      <div className="flex justify-center">
+        <AddInventoryForm 
+          onClose={() => setShowAddForm(false)}
+          onSave={handleAddItem}
+        />
+      </div>
+    )
   }
 
   return (
@@ -36,7 +53,10 @@ export function InventoryList() {
             <Package className="h-5 w-5 text-chhapai-gold" />
             Inventory Items
           </CardTitle>
-          <Button className="bg-chhapai-gold hover:bg-chhapai-gold-dark text-chhapai-black">
+          <Button 
+            onClick={() => setShowAddForm(true)}
+            className="bg-chhapai-gold hover:bg-chhapai-gold-dark text-chhapai-black"
+          >
             <Plus className="h-4 w-4 mr-2" />
             Add New Item
           </Button>

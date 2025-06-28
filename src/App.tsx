@@ -13,6 +13,8 @@ import RequisitionSlip from "./pages/forms/RequisitionSlip";
 import PurchaseOrder from "./pages/forms/PurchaseOrder";
 import DeliveryChallan from "./pages/forms/DeliveryChallan";
 import QualityCheck from "./pages/forms/QualityCheck";
+import MaterialReceived from "./pages/forms/MaterialReceived";
+import ProformaInvoice from "./pages/forms/ProformaInvoice";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +35,8 @@ const App = () => (
           <Route path="/forms/purchase-order" element={<PurchaseOrder />} />
           <Route path="/forms/delivery-challan" element={<DeliveryChallan />} />
           <Route path="/forms/quality-check" element={<QualityCheck />} />
+          <Route path="/forms/material-received" element={<MaterialReceived />} />
+          <Route path="/forms/proforma" element={<ProformaInvoice />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
