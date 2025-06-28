@@ -49,10 +49,12 @@ const formItems = [
 ]
 
 export function AppSidebar() {
-  const { collapsed } = useSidebar()
+  const { state } = useSidebar()
   const location = useLocation()
   const currentPath = location.pathname
   const [formsOpen, setFormsOpen] = useState(true)
+  
+  const collapsed = state === "collapsed"
 
   const isActive = (path: string) => currentPath === path
   const isGroupActive = (items: any[]) => items.some(item => isActive(item.url))
