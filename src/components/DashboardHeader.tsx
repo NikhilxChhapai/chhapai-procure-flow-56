@@ -12,12 +12,17 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
 
-export function DashboardHeader() {
+interface DashboardHeaderProps {
+  title: string;
+  subtitle?: string;
+}
+
+export function DashboardHeader({ title, subtitle }: DashboardHeaderProps) {
   const { user, userProfile, signOut } = useAuth();
 
   return (
-    <header className="border-b bg-white px-6 py-3">
-      <div className="flex items-center justify-between">
+    <header className="border-b bg-white px-6 py-4">
+      <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-4">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
@@ -70,6 +75,13 @@ export function DashboardHeader() {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+      </div>
+      
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
+        {subtitle && (
+          <p className="text-gray-600 mt-1">{subtitle}</p>
+        )}
       </div>
     </header>
   );
