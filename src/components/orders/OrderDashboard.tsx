@@ -2,10 +2,11 @@
 import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Plus, ClipboardList, TrendingUp, Clock, CheckCircle } from "lucide-react"
-import { OrderList } from "./OrderList"
+import { Plus, ClipboardList } from "lucide-react"
 import { OrderForm } from "./OrderForm"
 import { OrderStats } from "./OrderStats"
+import { OrderTabs } from "./OrderTabs"
+import { WebhookHandler } from "./WebhookHandler"
 
 export function OrderDashboard() {
   const [showOrderForm, setShowOrderForm] = useState(false)
@@ -32,7 +33,7 @@ export function OrderDashboard() {
           <ClipboardList className="h-8 w-8 text-chhapai-gold" />
           <div>
             <h2 className="text-2xl font-bold text-gray-900">Order Management</h2>
-            <p className="text-gray-600">Track orders from creation to delivery</p>
+            <p className="text-gray-600">Complete order lifecycle from WooCommerce to delivery</p>
           </div>
         </div>
         <Button 
@@ -40,12 +41,20 @@ export function OrderDashboard() {
           className="bg-chhapai-gold hover:bg-chhapai-gold-dark text-chhapai-black"
         >
           <Plus className="h-4 w-4 mr-2" />
-          Create New Order
+          Create Manual Order
         </Button>
       </div>
 
-      <OrderStats />
-      <OrderList key={refreshKey} />
+      <div className="grid gap-6 lg:grid-cols-4">
+        <div className="lg:col-span-3">
+          <OrderStats />
+        </div>
+        <div>
+          <WebhookHandler />
+        </div>
+      </div>
+
+      <OrderTabs key={refreshKey} />
     </div>
   )
 }
