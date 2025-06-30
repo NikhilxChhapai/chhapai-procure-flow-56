@@ -300,31 +300,40 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string | null
+          department: string | null
           email: string
           first_name: string | null
           id: string
           is_active: boolean | null
+          last_login: string | null
           last_name: string | null
+          permissions: Json | null
           role: Database["public"]["Enums"]["user_role"]
           updated_at: string | null
         }
         Insert: {
           created_at?: string | null
+          department?: string | null
           email: string
           first_name?: string | null
           id: string
           is_active?: boolean | null
+          last_login?: string | null
           last_name?: string | null
+          permissions?: Json | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
+          department?: string | null
           email?: string
           first_name?: string | null
           id?: string
           is_active?: boolean | null
+          last_login?: string | null
           last_name?: string | null
+          permissions?: Json | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string | null
         }
@@ -376,6 +385,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_user_permissions: {
+        Args: { user_role: Database["public"]["Enums"]["user_role"] }
+        Returns: Json
+      }
       get_user_role: {
         Args: Record<PropertyKey, never>
         Returns: Database["public"]["Enums"]["user_role"]
