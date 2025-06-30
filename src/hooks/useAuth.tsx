@@ -2,13 +2,14 @@
 import { useState, useEffect, createContext, useContext } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { User, Session } from '@supabase/supabase-js'
+import { Database } from '@/integrations/supabase/types'
 
 interface UserProfile {
   id: string
   email: string
   first_name: string | null
   last_name: string | null
-  role: string
+  role: Database['public']['Enums']['user_role']
   department: string | null
   permissions: any
   is_active: boolean | null
