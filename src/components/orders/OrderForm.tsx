@@ -8,6 +8,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ClipboardList, Save, X, Upload } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { supabase } from "@/integrations/supabase/client"
+import { useAuth } from "@/hooks/useAuth"
 
 interface OrderFormProps {
   onClose: () => void
@@ -34,6 +36,7 @@ const subTypes = {
 
 export function OrderForm({ onClose, onOrderCreated }: OrderFormProps) {
   const { toast } = useToast()
+  const { user } = useAuth()
   const [formData, setFormData] = useState({
     orderNo: `CH-ORD-${String(Date.now()).slice(-6)}`,
     customerName: '',
@@ -69,7 +72,7 @@ export function OrderForm({ onClose, onOrderCreated }: OrderFormProps) {
     }))
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!formData.customerName || !formData.productType || !formData.priority) {
       toast({
         title: "Missing Information",
@@ -79,12 +82,39 @@ export function OrderForm({ onClose, onOrderCreated }: OrderFormProps) {
       return
     }
 
-    // Save order logic here
-    toast({
-      title: "Order Created",
-      description: `Order ${formData.orderNo} has been created successfully.`,
-    })
-    onOrderCreated()
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .insert({
+          order_no: formData.orderNo,
+          customer_name: formData.customerName,
+          product_name: formData.productType,
+          sub_type: formData.subType,
+          quantity: formData.quantity,
+          price_per_unit: formData.pricePerPiece,
+          order_total: formData.totalAmount,
+          priority: formData.priority === 'Express' ? 'express' : 'normal',
+          order_notes: formData.internalNotes,
+          status: 'pending',
+          source: 'manual',
+          created_by: user?.id
+        })
+
+      if (error) throw error
+
+      toast({
+        title: "Order Created",
+        description: `Order ${formData.orderNo} has been created successfully.`,
+      })
+      onOrderCreated()
+    } catch (error) {
+      console.error('Error creating order:', error)
+      toast({
+        title: "Error",
+        description: "Failed to create order. Please try again.",
+        variant: "destructive"
+      })
+    }
   }
 
   return (

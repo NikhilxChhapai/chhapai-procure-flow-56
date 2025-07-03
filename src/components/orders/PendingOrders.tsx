@@ -1,5 +1,5 @@
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,36 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Search, ArrowRight, Download } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { generateFormPDF } from "@/utils/pdfGenerator"
-
-const pendingOrders = [
-  {
-    id: 1,
-    orderNo: "WC-12345",
-    customerName: "John Doe",
-    customerContact: "john@example.com",
-    productName: "Premium Business Cards",
-    sku: "BC-001",
-    quantity: 500,
-    pricePerUnit: 50,
-    orderTotal: 25000,
-    orderDate: "2024-01-15",
-    shippingAddress: "123 Main St, Mumbai",
-    orderNotes: "Urgent delivery required",
-    source: "WooCommerce",
-    priority: "Express"
-  },
-  {
-    id: 2,
-    orderNo: "CH-ORD-002",
-    customerName: "ABC Corp",
-    productName: "Invitation Box",
-    quantity: 100,
-    orderTotal: 15000,
-    orderDate: "2024-01-14",
-    source: "Manual",
-    priority: "Normal"
-  }
-]
+import { supabase } from "@/integrations/supabase/client"
 
 export function PendingOrders() {
   const { toast } = useToast()
@@ -46,6 +17,35 @@ export function PendingOrders() {
   const [selectedOrder, setSelectedOrder] = useState<any>(null)
   const [deliveryDate, setDeliveryDate] = useState("")
   const [selectedStages, setSelectedStages] = useState<string[]>([])
+  const [pendingOrders, setPendingOrders] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetchPendingOrders()
+  }, [])
+
+  const fetchPendingOrders = async () => {
+    try {
+      setLoading(true)
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      setPendingOrders(data || [])
+    } catch (error) {
+      console.error('Error fetching pending orders:', error)
+      toast({
+        title: 'Error',
+        description: 'Failed to fetch pending orders',
+        variant: 'destructive'
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const availableStages = [
     "Design Approval",
@@ -57,11 +57,11 @@ export function PendingOrders() {
   ]
 
   const filteredOrders = pendingOrders.filter(order =>
-    order.orderNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    order.customerName.toLowerCase().includes(searchTerm.toLowerCase())
+    order.order_no.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    order.customer_name.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  const moveToInProgress = (order: any) => {
+  const moveToInProgress = async (order: any) => {
     if (!deliveryDate) {
       toast({
         title: "Missing Information",
@@ -71,28 +71,66 @@ export function PendingOrders() {
       return
     }
 
-    // Generate Job Card PDF
-    const jobCardData = {
-      id: `JC-${order.orderNo}`,
-      orderNo: order.orderNo,
-      customerName: order.customerName,
-      productName: order.productName,
-      quantity: order.quantity,
-      deliveryDate,
-      stages: selectedStages,
-      orderTotal: order.orderTotal
+    try {
+      // Update order status to in_progress and set delivery date
+      const { error: updateError } = await supabase
+        .from('orders')
+        .update({ 
+          status: 'in_progress',
+          delivery_date: deliveryDate
+        })
+        .eq('id', order.id)
+
+      if (updateError) throw updateError
+
+      // Create order stages
+      const stageInserts = selectedStages.map(stage => ({
+        order_id: order.id,
+        stage_name: stage,
+        status: 'pending' as const
+      }))
+
+      if (stageInserts.length > 0) {
+        const { error: stagesError } = await supabase
+          .from('order_stages')
+          .insert(stageInserts)
+
+        if (stagesError) throw stagesError
+      }
+
+      // Generate Job Card PDF
+      const jobCardData = {
+        id: `JC-${order.order_no}`,
+        orderNo: order.order_no,
+        customerName: order.customer_name,
+        productName: order.product_name,
+        quantity: order.quantity,
+        deliveryDate,
+        stages: selectedStages,
+        orderTotal: order.order_total
+      }
+
+      generateFormPDF(jobCardData, 'Job Card')
+      
+      toast({
+        title: "Order Moved to In-Progress",
+        description: `${order.order_no} is now in production. Job Card generated.`,
+      })
+
+      // Refresh the pending orders list
+      await fetchPendingOrders()
+      
+      setSelectedOrder(null)
+      setDeliveryDate("")
+      setSelectedStages([])
+    } catch (error) {
+      console.error('Error moving order to production:', error)
+      toast({
+        title: "Error",
+        description: "Failed to move order to production. Please try again.",
+        variant: "destructive"
+      })
     }
-
-    generateFormPDF(jobCardData, 'Job Card')
-    
-    toast({
-      title: "Order Moved to In-Progress",
-      description: `${order.orderNo} is now in production. Job Card generated.`,
-    })
-
-    setSelectedOrder(null)
-    setDeliveryDate("")
-    setSelectedStages([])
   }
 
   return (
@@ -113,20 +151,48 @@ export function PendingOrders() {
         </Button>
       </div>
 
-      <div className="grid gap-4">
-        {filteredOrders.map((order) => (
+      {loading ? (
+        <div className="space-y-4">
+          {[1, 2, 3].map(i => (
+            <Card key={i} className="animate-pulse">
+              <CardContent className="p-6">
+                <div className="space-y-3">
+                  <div className="h-6 bg-gray-200 rounded w-1/3"></div>
+                  <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="grid gap-4">
+          {filteredOrders.length === 0 ? (
+            <Card>
+              <CardContent className="p-8 text-center">
+                <p className="text-gray-500">No pending orders found</p>
+                <Button 
+                  className="mt-4 bg-chhapai-gold hover:bg-chhapai-gold-dark text-chhapai-black"
+                  onClick={fetchPendingOrders}
+                >
+                  Refresh
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            filteredOrders.map((order) => (
           <Card key={order.id} className="hover:shadow-md transition-shadow">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <h3 className="font-semibold text-lg">{order.orderNo}</h3>
-                  <Badge variant={order.source === "WooCommerce" ? "default" : "secondary"}>
-                    {order.source}
-                  </Badge>
-                  <Badge variant={order.priority === "Express" ? "destructive" : "outline"}>
-                    {order.priority}
-                  </Badge>
-                </div>
+                  <div className="flex items-center gap-3">
+                    <h3 className="font-semibold text-lg">{order.order_no}</h3>
+                    <Badge variant={order.source === "WooCommerce" ? "default" : "secondary"}>
+                      {order.source || 'Manual'}
+                    </Badge>
+                    <Badge variant={order.priority === "express" ? "destructive" : "outline"}>
+                      {order.priority === 'express' ? 'Express' : 'Normal'}
+                    </Badge>
+                  </div>
                 <Button 
                   variant="outline" 
                   size="sm"
@@ -137,45 +203,47 @@ export function PendingOrders() {
                 </Button>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                <div>
-                  <strong>Customer:</strong> {order.customerName}
-                  {order.customerContact && <div className="text-gray-600">{order.customerContact}</div>}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                  <div>
+                    <strong>Customer:</strong> {order.customer_name}
+                    {order.customer_contact && <div className="text-gray-600">{order.customer_contact}</div>}
+                  </div>
+                  <div>
+                    <strong>Product:</strong> {order.product_name}
+                    {order.sku && <div className="text-gray-600">SKU: {order.sku}</div>}
+                  </div>
+                  <div>
+                    <strong>Quantity:</strong> {order.quantity}
+                    {order.price_per_unit && <div className="text-gray-600">@ ₹{order.price_per_unit}</div>}
+                  </div>
+                  <div>
+                    <strong>Total:</strong> ₹{order.order_total?.toLocaleString()}
+                    <div className="text-gray-600">{new Date(order.created_at).toLocaleDateString()}</div>
+                  </div>
                 </div>
-                <div>
-                  <strong>Product:</strong> {order.productName}
-                  {order.sku && <div className="text-gray-600">SKU: {order.sku}</div>}
-                </div>
-                <div>
-                  <strong>Quantity:</strong> {order.quantity}
-                  {order.pricePerUnit && <div className="text-gray-600">@ ₹{order.pricePerUnit}</div>}
-                </div>
-                <div>
-                  <strong>Total:</strong> ₹{order.orderTotal.toLocaleString()}
-                  <div className="text-gray-600">{order.orderDate}</div>
-                </div>
-              </div>
 
-              {order.shippingAddress && (
-                <div className="mt-3 text-sm">
-                  <strong>Shipping:</strong> {order.shippingAddress}
-                </div>
-              )}
+                {order.shipping_address && (
+                  <div className="mt-3 text-sm">
+                    <strong>Shipping:</strong> {order.shipping_address}
+                  </div>
+                )}
 
-              {order.orderNotes && (
-                <div className="mt-3 text-sm">
-                  <strong>Notes:</strong> {order.orderNotes}
-                </div>
-              )}
+                {order.order_notes && (
+                  <div className="mt-3 text-sm">
+                    <strong>Notes:</strong> {order.order_notes}
+                  </div>
+                )}
             </CardContent>
           </Card>
-        ))}
-      </div>
+            ))
+          )}
+        </div>
+      )}
 
       {selectedOrder && (
         <Card className="border-chhapai-gold">
           <CardHeader>
-            <CardTitle>Move {selectedOrder.orderNo} to Production</CardTitle>
+            <CardTitle>Move {selectedOrder.order_no} to Production</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>

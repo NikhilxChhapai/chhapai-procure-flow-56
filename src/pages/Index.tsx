@@ -1,8 +1,8 @@
 
 import { DashboardLayout } from "@/components/DashboardLayout"
-import { DashboardStats } from "@/components/DashboardStats"
+import { DashboardStatsOptimized } from "@/components/DashboardStatsOptimized"
 import { QuickActions } from "@/components/QuickActions"
-import { RecentActivity } from "@/components/RecentActivity"
+import { RecentActivityOptimized } from "@/components/RecentActivityOptimized"
 import { NotificationCenter } from "@/components/NotificationCenter"
 
 const Index = () => {
@@ -12,7 +12,7 @@ const Index = () => {
       subtitle="Welcome to Chhapai Procurement & Inventory Management System"
     >
       <div className="animate-fade-in space-y-6">
-        <DashboardStats />
+        <DashboardStatsOptimized />
         
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           <div className="lg:col-span-2">
@@ -23,7 +23,7 @@ const Index = () => {
           </div>
         </div>
         
-        <RecentActivity />
+        <RecentActivityOptimized />
       </div>
     </DashboardLayout>
   );

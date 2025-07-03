@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Clock, PlayCircle, CheckCircle } from "lucide-react"
 import { PendingOrders } from "./PendingOrders"
-import { InProgressOrders } from "./InProgressOrders"
+import { InProgressOrdersOptimized } from "./InProgressOrdersOptimized"
 import { CompletedOrders } from "./CompletedOrders"
 
 export function OrderTabs() {
@@ -37,7 +37,7 @@ export function OrderTabs() {
       </TabsContent>
       
       <TabsContent value="in-progress" className="mt-6">
-        <InProgressOrders />
+        <InProgressOrdersOptimized />
       </TabsContent>
       
       <TabsContent value="completed" className="mt-6">
