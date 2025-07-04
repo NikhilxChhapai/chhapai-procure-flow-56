@@ -9,6 +9,39 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      custom_stages: {
+        Row: {
+          created_at: string
+          department: string | null
+          display_order: number
+          estimated_hours: number | null
+          id: string
+          is_active: boolean
+          stage_name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          department?: string | null
+          display_order: number
+          estimated_hours?: number | null
+          id?: string
+          is_active?: boolean
+          stage_name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          department?: string | null
+          display_order?: number
+          estimated_hours?: number | null
+          id?: string
+          is_active?: boolean
+          stage_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       delivery_challans: {
         Row: {
           challan_no: string
@@ -61,6 +94,7 @@ export type Database = {
           supplier: string | null
           unit_price: number | null
           updated_at: string | null
+          vendor_id: string | null
         }
         Insert: {
           category?: string | null
@@ -72,6 +106,7 @@ export type Database = {
           supplier?: string | null
           unit_price?: number | null
           updated_at?: string | null
+          vendor_id?: string | null
         }
         Update: {
           category?: string | null
@@ -83,8 +118,17 @@ export type Database = {
           supplier?: string | null
           unit_price?: number | null
           updated_at?: string | null
+          vendor_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "inventory_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       inventory_usage: {
         Row: {
@@ -379,6 +423,101 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      stage_attachments: {
+        Row: {
+          created_at: string
+          file_name: string
+          file_path: string
+          file_type: string | null
+          id: string
+          order_stage_id: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          file_path: string
+          file_type?: string | null
+          id?: string
+          order_stage_id: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          file_path?: string
+          file_type?: string | null
+          id?: string
+          order_stage_id?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stage_attachments_order_stage_id_fkey"
+            columns: ["order_stage_id"]
+            isOneToOne: false
+            referencedRelation: "order_stages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendors: {
+        Row: {
+          address: string | null
+          contact_person: string | null
+          created_at: string
+          created_by: string | null
+          credit_limit_amount: number | null
+          credit_limit_days: number | null
+          email: string | null
+          gst_number: string | null
+          id: string
+          is_active: boolean
+          phone: string | null
+          product_types: string[] | null
+          typical_quantities: string[] | null
+          typical_sizes: string[] | null
+          updated_at: string
+          vendor_name: string
+        }
+        Insert: {
+          address?: string | null
+          contact_person?: string | null
+          created_at?: string
+          created_by?: string | null
+          credit_limit_amount?: number | null
+          credit_limit_days?: number | null
+          email?: string | null
+          gst_number?: string | null
+          id?: string
+          is_active?: boolean
+          phone?: string | null
+          product_types?: string[] | null
+          typical_quantities?: string[] | null
+          typical_sizes?: string[] | null
+          updated_at?: string
+          vendor_name: string
+        }
+        Update: {
+          address?: string | null
+          contact_person?: string | null
+          created_at?: string
+          created_by?: string | null
+          credit_limit_amount?: number | null
+          credit_limit_days?: number | null
+          email?: string | null
+          gst_number?: string | null
+          id?: string
+          is_active?: boolean
+          phone?: string | null
+          product_types?: string[] | null
+          typical_quantities?: string[] | null
+          typical_sizes?: string[] | null
+          updated_at?: string
+          vendor_name?: string
+        }
+        Relationships: []
       }
     }
     Views: {

@@ -30,15 +30,31 @@ import {
 } from "@/components/ui/sidebar"
 import { Badge } from "@/components/ui/badge"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { useAuth } from "@/hooks/useAuth"
 
-const mainNavItems = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard },
-  { title: "Order Management", url: "/orders", icon: ClipboardList, badge: "New" },
-  { title: "Inventory", url: "/inventory", icon: Package, badge: "12" },
-  { title: "Reports", url: "/reports", icon: BarChart3 },
-  { title: "Users", url: "/users", icon: Users },
-  { title: "Settings", url: "/settings", icon: Settings },
-]
+const getMainNavItems = (userRole: string) => {
+  const items = [
+    { title: "Dashboard", url: "/", icon: LayoutDashboard },
+    { title: "Order Management", url: "/orders", icon: ClipboardList, badge: "New" },
+  ]
+
+  // Role-based navigation
+  if (['admin', 'purchase'].includes(userRole)) {
+    items.push({ title: "Inventory", url: "/inventory", icon: Package, badge: "12" })
+  }
+  
+  if (['admin', 'accounts'].includes(userRole)) {
+    items.push({ title: "Reports", url: "/reports", icon: BarChart3 })
+  }
+  
+  if (userRole === 'admin') {
+    items.push({ title: "Admin Panel", url: "/admin", icon: Users })
+  }
+  
+  items.push({ title: "Settings", url: "/settings", icon: Settings })
+  
+  return items
+}
 
 const formItems = [
   { title: "Requisition Slip", url: "/forms/requisition", icon: FileText },
@@ -51,11 +67,13 @@ const formItems = [
 
 export function AppSidebar() {
   const { state } = useSidebar()
+  const { userProfile } = useAuth()
   const location = useLocation()
   const currentPath = location.pathname
   const [formsOpen, setFormsOpen] = useState(true)
   
   const collapsed = state === "collapsed"
+  const mainNavItems = getMainNavItems(userProfile?.role || 'viewer')
 
   const isActive = (path: string) => currentPath === path
   const isGroupActive = (items: any[]) => items.some(item => isActive(item.url))

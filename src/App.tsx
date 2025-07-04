@@ -19,6 +19,7 @@ import QualityCheck from "./pages/forms/QualityCheck";
 import MaterialReceived from "./pages/forms/MaterialReceived";
 import ProformaInvoice from "./pages/forms/ProformaInvoice";
 import NotFound from "./pages/NotFound";
+import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
 
@@ -53,6 +54,11 @@ const App = () => (
             <Route path="/users" element={
               <AuthGuard requiredRole={['admin']}>
                 <Users />
+              </AuthGuard>
+            } />
+            <Route path="/admin" element={
+              <AuthGuard requiredRole={['admin']}>
+                <Admin />
               </AuthGuard>
             } />
             <Route path="/settings" element={

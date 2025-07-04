@@ -105,6 +105,36 @@ export function UserManagement() {
     }
   }
 
+  const createUser = async (userData: { email: string; password: string; first_name: string; last_name: string; role: string }) => {
+    try {
+      const { error } = await supabase.auth.admin.createUser({
+        email: userData.email,
+        password: userData.password,
+        user_metadata: {
+          first_name: userData.first_name,
+          last_name: userData.last_name,
+          role: userData.role
+        }
+      })
+
+      if (error) throw error
+
+      toast({
+        title: 'Success',
+        description: 'User created successfully'
+      })
+      
+      await fetchUsers()
+    } catch (error: any) {
+      console.error('Error creating user:', error)
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to create user',
+        variant: 'destructive'
+      })
+    }
+  }
+
   if (loading) {
     return (
       <Card>
